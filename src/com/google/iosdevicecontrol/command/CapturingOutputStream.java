@@ -18,7 +18,8 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkPositionIndex;
 import static com.google.common.base.Verify.verify;
 
-import com.google.common.math.IntMath;
+import com.google.common.math.LongMath;
+import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.Monitor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,11 +31,14 @@ import java.util.Arrays;
  * An {@link OutputStream} that captures all bytes written to it in order to supply multiple
  * InputStreams that can stream over the bytes at their own pace.
  *
- * <p>This class ensures multiple input streams retured by {@link #openInputStream} may be read from
- * at the same time, but it does NOT ensure concurrent writes to the CapturingOutputStream or
+ * <p>This class ensures multiple input streams returned by {@link #openInputStream} may be read
+ * from at the same time, but it does NOT ensure concurrent writes to the CapturingOutputStream or
  * concurrent reads from the individual input stream are thread safe.
  */
 final class CapturingOutputStream extends OutputStream {
+  // Same value as ArrayList.MAX_ARRAY_SIZE - see the comment there for details.
+  private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
   // The monitor is used as a signaling mechanism between the CapturingOutputStream and its input
   // streams. When a CapturingInputStream is read and there are no bytes to be read and the output
   // stream is not closed, it waits on the monitor. When bytes are written to the output stream or
@@ -61,7 +65,7 @@ final class CapturingOutputStream extends OutputStream {
 
   @SuppressWarnings("NonAtomicVolatileUpdate")
   @Override
-  public void write(int b) {
+  public void write(int b) throws IOException {
     ensureCapacityToWrite(1);
     data[size] = (byte) b;
     size += 1;
@@ -70,7 +74,7 @@ final class CapturingOutputStream extends OutputStream {
 
   @SuppressWarnings("NonAtomicVolatileUpdate")
   @Override
-  public void write(byte[] b, int off, int len) {
+  public void write(byte[] b, int off, int len) throws IOException {
     // checkPositionIndex throws IndexOutOfBoundsException, as required by write contract
     checkPositionIndex(off, b.length);
     checkPositionIndex(len, b.length - off, "len < 0 or off + len > b.length");
@@ -80,11 +84,14 @@ final class CapturingOutputStream extends OutputStream {
     signalBytesWrittenOrStreamClosed();
   }
 
-  private void ensureCapacityToWrite(int numBytesToWrite) {
-    int minCapacity = IntMath.checkedAdd(size, numBytesToWrite);
+  private void ensureCapacityToWrite(int numBytesToWrite) throws IOException {
+    long minCapacity = LongMath.checkedAdd(size, numBytesToWrite);
     if (minCapacity > data.length) {
-      int newCapacity = Math.max(data.length * 2, minCapacity);
-      data = Arrays.copyOf(data, newCapacity);
+      long newCapacity = Math.min(Math.max(data.length * 2L, minCapacity), MAX_BUFFER_SIZE);
+      if (newCapacity < minCapacity) {
+        throw new IOException("Cannot allocate enough memory to capture all output");
+      }
+      data = Arrays.copyOf(data, Ints.checkedCast(newCapacity));
     }
   }
 

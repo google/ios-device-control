@@ -21,6 +21,9 @@ import java.nio.file.Path;
 
 /** Interface that extends {@link IosDevice} for real device specific commands and operations */
 public interface RealDevice extends IosDevice {
+  /** Returns whether the device is currently restarting. */
+  boolean isRestarting();
+
   /** Installs a configuration or provisioning profile at the specified path. */
   void installProfile(Path profilePath) throws IosDeviceException;
 

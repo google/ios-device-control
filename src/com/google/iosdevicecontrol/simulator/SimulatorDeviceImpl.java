@@ -83,12 +83,6 @@ final class SimulatorDeviceImpl implements SimulatorDevice {
   }
 
   @Override
-  public boolean isRestarting() {
-    // TODO(user): Finish this
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public void erase() throws IosDeviceException {
     shutdown();
     await(simctl.erase());

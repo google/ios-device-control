@@ -1,6 +1,6 @@
-# Ios Device Control Library
+# iOS Device Control Library
 
-Ios Device Control is a Java library for controlling real (physical) devices and
+iOS Device Control is a Java library for controlling real (physical) devices and
 simulated devices tethered to a device running macOS. This includes the ability
 to get system information, install and start applications, take screenshots,
 capture logs, and more!
@@ -10,13 +10,15 @@ Simulator (simctl) and the open source libimobiledevice binaries for real
 devices. Examples of how to use this library can be found
 [here](src/com/google/iosdevicecontrol/examples). To run the examples, run:
 
-<code>mvn assembly:assembly</code>
+```console
+mvn assembly:assembly
+```
 
 which will create two runnable jars in the target directory.
 
 ## License
 
-Ios Device Control is licensed under the open-source [Apache 2.0
+iOS Device Control is licensed under the open-source [Apache 2.0
 license](LICENSE)
 
 ## Contributing

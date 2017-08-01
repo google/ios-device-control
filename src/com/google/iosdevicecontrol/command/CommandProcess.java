@@ -58,7 +58,7 @@ public abstract class CommandProcess {
     stdoutStream = new CapturingOutputStream();
     stderrStream = new CapturingOutputStream();
 
-    Supplier<Level> ioLogLevel = new Supplier () {
+    Supplier<Level> ioLogLevel = new Supplier<Level>() {
       @Override
       public Level get() {
         return CommandProcess.this.rawProcess.isAlive() ? Level.WARNING : Level.FINE;
@@ -91,8 +91,8 @@ public abstract class CommandProcess {
       InputSource inputSource, Optional<OutputStream> pipe, Supplier<Level> ioLogLevel)
       throws IOException {
     if (pipe.isPresent() && !inputSource.kind().equals(InputSource.Kind.PROCESS)) {
-      InputStream stdinSource = inputSource.byteSource().get().openStream();
-      return Optional.of(AsyncCopier.start(stdinSource, pipe.get(), ioLogLevel));
+      InputStream sourceStream = inputSource.byteSource().get().openStream();
+      return Optional.of(AsyncCopier.start(sourceStream, pipe.get(), ioLogLevel));
     } else {
       return Optional.absent();
     }
@@ -106,12 +106,17 @@ public abstract class CommandProcess {
       Supplier<Level> ioLogLevel)
       throws IOException {
     if (pipe.isPresent()) {
-      OutputStream sinkStream =
-          outputSink.kind().equals(OutputSink.Kind.PROCESS_OUT)
-              ? stdoutStream
-              : outputSink.kind().equals(OutputSink.Kind.PROCESS_ERR)
-                  ? stderrStream
-                  : outputSink.byteSink().get().openStream();
+      OutputStream sinkStream;
+      switch (outputSink.kind()) {
+        case PROCESS_OUT:
+          sinkStream = stdoutStream;
+          break;
+        case PROCESS_ERR:
+          sinkStream = stderrStream;
+          break;
+        default:
+          sinkStream = outputSink.byteSink().get().openStream();
+      }
       return Optional.of(AsyncCopier.start(pipe.get(), sinkStream, ioLogLevel));
     } else {
       return Optional.absent();

@@ -28,9 +28,6 @@ public interface IosDevice {
   /** Returns whether the device is responsive to communication from the host. */
   boolean isResponsive();
 
-  /** Returns whether the device is currently restarting. */
-  boolean isRestarting();
-
   /**
    * Returns the model of the device.
    *

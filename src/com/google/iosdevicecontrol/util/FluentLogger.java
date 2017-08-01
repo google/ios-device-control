@@ -15,6 +15,7 @@
 package com.google.iosdevicecontrol.util;
 
 import java.util.Optional;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +27,10 @@ public final class FluentLogger {
   /** Returns a generic fluent logger for a class. */
   public static FluentLogger forEnclosingClass() {
     StackTraceElement caller = new Throwable().getStackTrace()[1];
-    return new FluentLogger(Logger.getLogger(caller.getClassName()), Level.OFF, Optional.empty());
+    Logger logger = Logger.getLogger(caller.getClassName());
+    logger.setUseParentHandlers(false);
+    logger.addHandler(new ConsoleHandler());
+    return new FluentLogger(logger, Level.OFF, Optional.empty());
   }
 
   private final Logger logger;
