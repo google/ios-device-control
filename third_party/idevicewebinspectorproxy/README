@@ -1,0 +1,8 @@
+Utility binary for proxying a WebInspector connection from a real iOS device to
+a local socket at a specific port.
+
+To install the binary, the libimobiledevice Github project needs to be cloned.
+Then run the following command, replacing libimd root with the location of the
+libimobiledevice root directory:
+
+sudo make install LIBIMD_ROOT=/path/to/libimobiledevice

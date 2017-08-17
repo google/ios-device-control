@@ -1,0 +1,5 @@
+This is the code for iOS apps that are used to help automate iOS tests.
+
+To build this app, create a new XCode project and import this folder. Then
+build the file as an ipa and move that ipa to /usr/local/share/OpenUrl.ipa in
+order to use the ipa in conjunction with the OpenUrlApp Java library.
