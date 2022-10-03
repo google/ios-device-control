@@ -195,6 +195,9 @@ final class SimulatorDeviceImpl implements SimulatorDevice {
           entries.hasMoreElements(); ) {
         ZipEntry entry = entries.nextElement();
         Path targetFile = targetDirectory.resolve(entry.getName());
+        if (!targetFile.normalize().startsWith(targetDirectory.normalize())) {
+          throw new IOException("Bad zip entry");
+        }
         if (entry.isDirectory()) {
           Files.createDirectories(targetFile);
         } else {
